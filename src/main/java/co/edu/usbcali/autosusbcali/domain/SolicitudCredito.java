@@ -19,6 +19,14 @@ public class SolicitudCredito {
     private Long id;
 
     @ManyToOne
+    @JoinColumn(name = "cotizacion_id", nullable = false)
+    private Cotizacion cotizacion;
+
+    @ManyToOne
+    @JoinColumn(name = "comprador_id", nullable = false)
+    private Usuario comprador;
+
+    @ManyToOne
     @JoinColumn(name = "entidad_financiera_id", nullable = false)
     private EntidadFinanciera entidadFinanciera;
 
@@ -27,6 +35,9 @@ public class SolicitudCredito {
 
     @Column(name = "cuota_inicial", precision = 15, scale = 2)
     private BigDecimal cuotaInicial;
+
+    @Column(name = "plazo_meses", nullable = false)
+    private Short plazoMeses;
 
     @Column(name = "estado", length = 20, nullable = false)
     private String estado;
@@ -39,5 +50,4 @@ public class SolicitudCredito {
 
     @Column(name = "fecha_respuesta")
     private LocalDateTime fechaRespuesta;
-
 }

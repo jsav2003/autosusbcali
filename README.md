@@ -62,11 +62,20 @@ src/main/java/co/edu/usbcali/autosusbcali/
 
 ## Estado del modelo de dominio
 
-El modelo se está construyendo entidad por entidad. Hasta ahora:
+La base de datos tiene **33 tablas** y el modelo **31 clases**: `usuarios_roles` y
+`roles_permisos` son tablas puente de dos FK y se resuelven con `@ManyToMany` dentro de
+`Usuario` y `Rol`, sin clase propia.
 
-- **Implementadas:** `Marca`, `EntidadFinanciera`, `SolicitudCredito`
-- **Pendientes (clases creadas, aún vacías):** `Auditoria`, `Contrato`, `Cotizacion`,
-  `Factura`, `Garantia`, `Modelo`, `Negociacion`, `Notificacion`, `Pago`, `Permiso`,
-  `Pqrs`, `Reserva`, `Rol`, `Usuario`, `Vehiculo`, `Venta`
+- **Mapeadas (26).** Catálogos y seguridad: `Usuario`, `Rol`, `Permiso`. Inventario:
+  `Marca`, `Modelo`, `Vehiculo`, `FichaTecnica`, `ImagenVehiculo`, `DocumentoVehiculo`,
+  `VerificacionRunt`. Proceso comercial: `OportunidadVenta`, `Negociacion`, `Reserva`,
+  `CitaServicio`, `Cotizacion`, `AccesorioCotizacion`. Crédito: `EntidadFinanciera`,
+  `SolicitudCredito`. Cierre: `Venta`, `Pago`, `TransaccionPasarela`, `TramiteTraspaso`.
+  Soporte: `Auditoria`, `TokenRecuperacion`, `BusquedaGuardada`, `ParametroSistema`.
+- **Pendientes (5), clases creadas y vacías:** `Factura`, `Contrato`, `Garantia`, `Pqrs`,
+  `Notificacion`.
 
 Todavía no hay repositorios, servicios ni controladores REST.
+
+Las convenciones de mapeo, los tipos usados y las decisiones de diseño están en
+[MAPEO.md](MAPEO.md).

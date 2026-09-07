@@ -62,18 +62,17 @@ src/main/java/co/edu/usbcali/autosusbcali/
 
 ## Estado del modelo de dominio
 
-La base de datos tiene **33 tablas** y el modelo **31 clases**: `usuarios_roles` y
-`roles_permisos` son tablas puente de dos FK y se resuelven con `@ManyToMany` dentro de
-`Usuario` y `Rol`, sin clase propia.
+La base de datos tiene **33 tablas** y el modelo **31 clases**, todas mapeadas:
+`usuarios_roles` y `roles_permisos` son tablas puente de dos FK y se resuelven con
+`@ManyToMany` dentro de `Usuario` y `Rol`, sin clase propia.
 
-- **Mapeadas (26).** Catálogos y seguridad: `Usuario`, `Rol`, `Permiso`. Inventario:
-  `Marca`, `Modelo`, `Vehiculo`, `FichaTecnica`, `ImagenVehiculo`, `DocumentoVehiculo`,
-  `VerificacionRunt`. Proceso comercial: `OportunidadVenta`, `Negociacion`, `Reserva`,
-  `CitaServicio`, `Cotizacion`, `AccesorioCotizacion`. Crédito: `EntidadFinanciera`,
-  `SolicitudCredito`. Cierre: `Venta`, `Pago`, `TransaccionPasarela`, `TramiteTraspaso`.
-  Soporte: `Auditoria`, `TokenRecuperacion`, `BusquedaGuardada`, `ParametroSistema`.
-- **Pendientes (5), clases creadas y vacías:** `Factura`, `Contrato`, `Garantia`, `Pqrs`,
-  `Notificacion`.
+Catálogos y seguridad: `Usuario`, `Rol`, `Permiso`. Inventario: `Marca`, `Modelo`,
+`Vehiculo`, `FichaTecnica`, `ImagenVehiculo`, `DocumentoVehiculo`, `VerificacionRunt`.
+Proceso comercial: `OportunidadVenta`, `Negociacion`, `Reserva`, `CitaServicio`,
+`Cotizacion`, `AccesorioCotizacion`. Crédito: `EntidadFinanciera`, `SolicitudCredito`.
+Cierre y postventa: `Venta`, `Pago`, `TransaccionPasarela`, `TramiteTraspaso`, `Factura`,
+`Contrato`, `Garantia`, `Pqrs`, `Notificacion`. Soporte: `Auditoria`,
+`TokenRecuperacion`, `BusquedaGuardada`, `ParametroSistema`.
 
 Todavía no hay repositorios, servicios ni controladores REST.
 

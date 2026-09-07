@@ -41,11 +41,11 @@ La base de datos tiene **33 tablas**. El modelo tiene **31 clases**: las tablas
 | `tokens_recuperacion` | `TokenRecuperacion` | ✔ |
 | `busquedas_guardadas` | `BusquedaGuardada` | ✔ |
 | `parametros_sistema` | `ParametroSistema` | ✔ |
-| `facturas` | `Factura` | **pendiente** |
-| `contratos` | `Contrato` | **pendiente** |
-| `garantias` | `Garantia` | **pendiente** |
-| `pqrs` | `Pqrs` | **pendiente** |
-| `notificaciones` | `Notificacion` | **pendiente** |
+| `facturas` | `Factura` | ✔ |
+| `contratos` | `Contrato` | ✔ |
+| `garantias` | `Garantia` | ✔ |
+| `pqrs` | `Pqrs` | ✔ |
+| `notificaciones` | `Notificacion` | ✔ |
 
 ---
 
@@ -231,18 +231,23 @@ con SQL a mano y manda ella; las entidades se limitan a reflejarla.
 
 ---
 
-## 7. Las 5 entidades pendientes
+## 7. Las últimas 5 entidades: cierre de venta y postventa
 
-Están creadas pero vacías. Ninguna otra tabla las referencia con FK, así que el proyecto
-compila sin ellas. Las columnas hay que sacarlas de la base de datos.
+Ninguna otra tabla las referencia con FK, así que el proyecto compilaba sin ellas
+mientras estaban vacías. Ya están mapeadas.
 
-| Clase | Tabla | Qué tiene de particular |
-|---|---|---|
-| `Factura` | `facturas` | FK a `ventas` con `UNIQUE`, o sea relación 1 a 1. Tres `numeric(15,2)`. |
-| `Contrato` | `contratos` | Igual, 1 a 1 con `ventas`. Dos `boolean` de firma. Fechas opcionales y obligatorias mezcladas. |
-| `Garantia` | `garantias` | Dos columnas `date` (`LocalDate`) y un `smallint` (`Short`). Columnas `text`. |
-| `Pqrs` | `pqrs` | **Tres FK a `usuarios`** (`comprador_id`, `usuario_asignado_id`) más una opcional a `ventas`. Se distinguen por el `name` del `@JoinColumn`. |
-| `Notificacion` | `notificaciones` | FK con `ON DELETE CASCADE` (eso se maneja en la BD, no en la anotación). Mezcla `text` y `varchar`. |
+| Clase | Tabla | Relación con `ventas` | Qué tiene de particular |
+|---|---|---|---|
+| `Factura` | `facturas` | 1 a 1 (`venta_id UNIQUE`) | Tres `numeric(15,2)` (`subtotal`, `iva`, `total`). |
+| `Contrato` | `contratos` | 1 a 1 (`venta_id UNIQUE`) | Dos `boolean` de firma. Fechas opcionales y obligatorias mezcladas. |
+| `Garantia` | `garantias` | 1 a 1 (`venta_id UNIQUE`) | Dos columnas `date` (`LocalDate`) y un `smallint` (`Short`). Columnas `text`. |
+| `Pqrs` | `pqrs` | N a 1, **opcional** (`venta_id` sin `UNIQUE`, sin `NOT NULL`) | Tres FK en total: `comprador_id` (obligatoria), `usuario_asignado_id` (opcional), ambas a `usuarios` y distinguidas por el `name` del `@JoinColumn`. |
+| `Notificacion` | `notificaciones` | no aplica, FK es a `usuarios` | `usuario_id` con `ON DELETE CASCADE` (se maneja en la BD, no en la anotación). Mezcla `text` y `varchar`. `referencia_id` es un `Long` suelto, sin FK real: es una columna polimórfica genérica. |
+
+`Factura`, `Contrato` y `Garantia` son las tres que se generan **una vez por venta** al
+cerrarla, por eso su FK a `ventas` lleva `UNIQUE`. `Pqrs` y `Notificacion` se acumulan
+con el tiempo (un comprador puede radicar varias PQRS, un usuario recibe muchas
+notificaciones), por eso ninguna de sus FK es única.
 
 Para ver las columnas de una tabla, en `psql`:
 
@@ -250,7 +255,8 @@ Para ver las columnas de una tabla, en `psql`:
 \d facturas
 ```
 
-O desde la ventana Database de IntelliJ, abriendo la tabla.
+O desde la ventana Database de IntelliJ, abriendo la tabla. También están todas en
+`Semestre_6/Sistemas computacioanales basados en Servicios/Semana 2/database/schema.sql`.
 
 ---
 

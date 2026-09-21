@@ -19,6 +19,8 @@ La app corre en `http://localhost:8080`. Todas las rutas empiezan por `/api`.
 | GET | `/api/roles/por-id/{id}` | un rol, buscado por id | 404 |
 | GET | `/api/roles/por-nombre/{nombre}` | un rol, buscado por nombre | 404 |
 
+Todos responden con `ObtenerRolResponse` (`id` y `nombre`), no con la entidad: ver §5.
+
 Ejemplos para copiar tal cual:
 
 ```
@@ -74,13 +76,14 @@ en una URL.
 ## 4. Cómo está escrito un endpoint
 
 ```java
-@GetMapping("/por-id/{id}")                                   // (1)
-public ResponseEntity<Rol> obtenerPorId(@PathVariable Long id) { // (2)
-    Optional<Rol> rolOptional = rolRepository.findById(id);  // (3)
+@GetMapping("/por-id/{id}")                                                // (1)
+public ResponseEntity<ObtenerRolResponse> obtenerPorId(@PathVariable Long id) { // (2)
+    Optional<Rol> rolOptional = rolRepository.findById(id);               // (3)
     if (rolOptional.isPresent()) {
-        return new ResponseEntity<>(rolOptional.get(), HttpStatus.OK); // (4)
+        return new ResponseEntity<>(
+                RolMapper.rolAObtenerRolResponse(rolOptional.get()), HttpStatus.OK); // (4)
     }
-    return new ResponseEntity<>(HttpStatus.NOT_FOUND);       // (5)
+    return new ResponseEntity<>(HttpStatus.NOT_FOUND);                    // (5)
 }
 ```
 
@@ -89,21 +92,24 @@ public ResponseEntity<Rol> obtenerPorId(@PathVariable Long id) { // (2)
 2. `@PathVariable Long id` — toma el `{id}` de la URL y lo convierte a `Long`. El nombre
    del parámetro tiene que coincidir con el de las llaves.
 3. `findById` viene gratis de `JpaRepository`. Devuelve `Optional` porque puede no haber
-   nada con ese id.
-4. Si hay rol → **200** con el rol en el cuerpo (Spring lo convierte a JSON).
-5. Si no → **404** sin cuerpo.
+   nada con ese id. Aquí todavía se trabaja con la **entidad** `Rol`.
+4. Si hay rol → se convierte a DTO con el mapper (§5) y se responde **200** con él en el
+   cuerpo (Spring lo convierte a JSON).
+5. Si no → **404** sin cuerpo. El mapper no se llama: no hay nada que convertir.
 
-**Por qué `ResponseEntity` y no devolver `Rol` directo:** `ResponseEntity` deja elegir el
-código HTTP. Si el método devolviera `Rol` y no lo encontrara, respondería 200 vacío, y
-el cliente no sabría que el rol no existe.
+**Por qué `ResponseEntity` y no devolver el objeto directo:** `ResponseEntity` deja elegir
+el código HTTP. Si el método devolviera el rol y no lo encontrara, respondería 200 vacío,
+y el cliente no sabría que el rol no existe.
 
-**Las listas no llevan `ResponseEntity`:** `obtenerTodos()` devuelve `List<Rol>` sin más.
-Una lista vacía es una respuesta válida (200 con `[]`), no un error.
+**Las listas no llevan `ResponseEntity`:** `obtenerTodos()` devuelve
+`List<ObtenerRolResponse>` sin más. Una lista vacía es una respuesta válida (200 con
+`[]`), no un error.
 
 ### Forma equivalente, más corta
 
 ```java
 return rolRepository.findById(id)
+        .map(RolMapper::rolAObtenerRolResponse)
         .map(ResponseEntity::ok)
         .orElse(ResponseEntity.notFound().build());
 ```
@@ -112,7 +118,48 @@ Hace exactamente lo mismo que el `if`. Usar la que se entienda mejor.
 
 ---
 
-## 5. De dónde sale cada método del repositorio
+## 5. DTO y mapper: no se devuelve la entidad
+
+Los endpoints **no devuelven `Rol`** (la entidad JPA), sino `ObtenerRolResponse`, un DTO
+con solo lo que el cliente necesita:
+
+```java
+public record ObtenerRolResponse(Long id, String nombre) { }
+```
+
+La conversión la hace `RolMapper` (paquete `mapper`), con dos métodos estáticos:
+
+| Método | Convierte |
+|---|---|
+| `rolAObtenerRolResponse(Rol)` | un rol → un DTO |
+| `listaRolesAlistaObtenerRolResponse(List<Rol>)` | una lista → lista de DTO (`stream().map(...).toList()`) |
+
+Respuesta de `GET /api/roles`:
+
+```json
+[{"id":1,"nombre":"ADMIN"},{"id":2,"nombre":"ASESOR"}, ...]
+```
+
+**Por qué no devolver la entidad:**
+
+- **Se expone de más.** `Rol` trae `descripcion`, `activo` y la lista entera de
+  `permisos` (por el `@ManyToMany`, `EAGER`). Con la entidad, un solo rol ocupaba cientos
+  de caracteres; con el DTO, dos campos.
+- **La API queda atada a la BD.** Si mañana cambia una columna, cambia el JSON que reciben
+  los clientes. Con DTO, el contrato de la API se decide aparte.
+- **Riesgo de recursión.** Entidades con relaciones en los dos sentidos pueden generar un
+  JSON infinito al serializarse. Un DTO plano no tiene ese problema.
+
+**Por qué `record`:** es una clase inmutable de solo datos; Java genera el constructor,
+los accesores (`id()`, `nombre()`), `equals`, `hashCode` y `toString`. No hace falta
+Lombok.
+
+**Flujo completo:** repositorio → `Rol` (entidad) → `RolMapper` → `ObtenerRolResponse`
+(DTO) → JSON.
+
+---
+
+## 6. De dónde sale cada método del repositorio
 
 | Método | Origen |
 |---|---|
@@ -131,7 +178,7 @@ Tipo de retorno:
 
 ---
 
-## 6. Errores que ya salieron (y qué significaban)
+## 7. Errores que ya salieron (y qué significaban)
 
 | Mensaje | Causa real |
 |---|---|
@@ -139,3 +186,4 @@ Tipo de retorno:
 | `';' expected` + `not a statement` en la misma línea | paréntesis de más: `new ResponseEntity<>(x.get()),HttpStatus.OK)` |
 | import `javax.swing.text.html.Option` | el autocompletado eligió `Option` (Swing) en vez de `Optional` (`java.util`) |
 | dos métodos llamados `obtenerPorNombre` | compila (sobrecarga por tipo de parámetro), pero confunde; se renombró a `obtenerPorId` |
+| la app sigue respondiendo el rol completo tras cambiar el código | la app no se reinició: corre la versión compilada anterior |

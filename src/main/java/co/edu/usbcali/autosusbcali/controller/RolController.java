@@ -1,9 +1,7 @@
 package co.edu.usbcali.autosusbcali.controller;
 
-import co.edu.usbcali.autosusbcali.domain.Rol;
 import co.edu.usbcali.autosusbcali.dto.response.ObtenerRolResponse;
-import co.edu.usbcali.autosusbcali.mapper.RolMapper;
-import co.edu.usbcali.autosusbcali.repository.RolRepository;
+import co.edu.usbcali.autosusbcali.service.RolService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -13,45 +11,37 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("api/roles")
 @AllArgsConstructor
 
 public class RolController {
-    private final RolRepository rolRepository;
+
+    private final RolService rolService;
 
     @GetMapping
     public List<ObtenerRolResponse> obtenerTodos() {
-        return RolMapper.listaRolesAlistaObtenerRolResponse(rolRepository.findAll());
+        return rolService.obtenerTodos();
     }
 
     @GetMapping("/activos")
     public List<ObtenerRolResponse> obtenerTodosActivos() {
-        return RolMapper.listaRolesAlistaObtenerRolResponse(rolRepository.findByActivo(true));
+        return rolService.buscarRolPorEstado(true);
     }
 
     @GetMapping("/inactivos")
     public List<ObtenerRolResponse> obtenerTodosInactivos() {
-        return RolMapper.listaRolesAlistaObtenerRolResponse(rolRepository.findByActivo(false));
+        return rolService.buscarRolPorEstado(false);
     }
 
     @GetMapping("/por-nombre/{nombre}")
     public ResponseEntity<ObtenerRolResponse> obtenerPorNombre(@PathVariable String nombre) {
-        Optional<Rol> rolOptional = rolRepository.findByNombre(nombre);
-        if (rolOptional.isPresent()) {
-            return new ResponseEntity<>(RolMapper.rolAObtenerRolResponse(rolOptional.get()), HttpStatus.OK);
-        }
-        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>(rolService.obtenerRolPorNombre(nombre), HttpStatus.OK);
     }
 
     @GetMapping("/por-id/{id}")
     public ResponseEntity<ObtenerRolResponse> obtenerPorId(@PathVariable Long id) {
-        Optional<Rol> rolOptional = rolRepository.findById(id);
-        if (rolOptional.isPresent()) {
-            return new ResponseEntity<>(RolMapper.rolAObtenerRolResponse(rolOptional.get()), HttpStatus.OK);
-        }
-        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>(rolService.obtenerRolPorId(id), HttpStatus.OK);
     }
 }

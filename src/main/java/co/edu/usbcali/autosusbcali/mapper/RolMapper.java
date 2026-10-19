@@ -7,8 +7,7 @@ import java.util.List;
 
 public class RolMapper {
     public static ObtenerRolResponse rolAObtenerRolResponse(Rol rol) {
-        ObtenerRolResponse obtenerRolResponse =
-                new ObtenerRolResponse(rol.getId(),rol.getNombre());
+        ObtenerRolResponse obtenerRolResponse = new ObtenerRolResponse(rol.getId(),rol.getNombre());
         return obtenerRolResponse;
     }
 

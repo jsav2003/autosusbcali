@@ -1,5 +1,6 @@
 package co.edu.usbcali.autosusbcali.service;
 
+import co.edu.usbcali.autosusbcali.dto.request.CrearModificarRolRequest;
 import co.edu.usbcali.autosusbcali.dto.response.ObtenerRolResponse;
 
 import java.util.List;
@@ -12,4 +13,7 @@ public interface IRolService {
     ObtenerRolResponse obtenerRolPorNombre(String nombre);
 
     ObtenerRolResponse obtenerRolPorId(Long id);
+
+    ObtenerRolResponse crearRol(CrearModificarRolRequest crearModificarRolRequest) throws Exception;
+
 }

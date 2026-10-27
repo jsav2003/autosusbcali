@@ -47,4 +47,11 @@ public class RolController {
                 rolService.crearRol(crearModificarRolRequest),HttpStatus.CREATED
         );
     }
+
+    @PutMapping("/modificar/{id}")
+    public ResponseEntity<ObtenerRolResponse> modificarRol(@PathVariable Long id, @RequestBody CrearModificarRolRequest crearModificarRolRequest) throws Exception {
+        return new ResponseEntity<>(
+                rolService.modificarRol(id, crearModificarRolRequest),HttpStatus.OK
+        );
+    }
 }

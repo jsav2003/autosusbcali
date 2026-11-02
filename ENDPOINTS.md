@@ -30,6 +30,30 @@ http://localhost:8080/api/roles/por-id/1
 http://localhost:8080/api/roles/por-nombre/ADMIN
 ```
 
+#### Eliminar un rol — `DELETE /api/roles/eliminar/{id}`
+
+**Borrado lógico:** el rol no se borra de la base de datos, solo se pone `activo = false`.
+Por eso después aparece en `/api/roles/inactivos` y deja de aparecer en `/activos`.
+Si se borrara la fila de verdad, se perderían las relaciones que la apuntan.
+
+| Situación | Respuesta |
+|---|---|
+| el rol existe y está activo | **204** No Content (sin cuerpo); queda inactivo |
+| el id no existe | **404** "Rol no encontrado" |
+| el rol ya estaba inactivo | **500** "El rol ya se encuentra inactivo" |
+
+```
+DELETE http://localhost:8080/api/roles/eliminar/5
+```
+
+El navegador solo hace GET, así que este endpoint se prueba con Postman o `curl`:
+
+```
+curl -X DELETE http://localhost:8080/api/roles/eliminar/5
+```
+
+Probado el 02/11 con la app corriendo (ver las tres respuestas de la tabla).
+
 Datos que hay en `servicios_db` para probar:
 
 | id | nombre |
@@ -63,7 +87,9 @@ en una URL.
 | Código | Cuándo sale aquí | Ejemplo |
 |---|---|---|
 | **200** OK | se encontró | `/por-id/1` |
+| **204** No Content | se hizo la acción y no hay nada que devolver | `DELETE /eliminar/5` |
 | **404** Not Found | la búsqueda no encontró nada | `/por-id/99`, `/por-nombre/admin` |
+| **500** Internal Server Error | una validación del servicio lanzó `Exception` | `DELETE /eliminar/5` sobre un rol ya inactivo |
 | **400** Bad Request | la URL no se puede convertir al tipo del parámetro | `/por-id/abc` (no es número), `/por-nombre/{{nombre}}` |
 
 - **La búsqueda por nombre distingue mayúsculas.** En la BD está `ADMIN`, así que `admin`

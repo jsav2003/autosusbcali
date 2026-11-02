@@ -54,4 +54,10 @@ public class RolController {
                 rolService.modificarRol(id, crearModificarRolRequest),HttpStatus.OK
         );
     }
+
+    @DeleteMapping("/eliminar/{id}")
+    public ResponseEntity<Void> eliminarRol(@PathVariable Long id) throws Exception {
+        rolService.eliminarRol(id);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
 }

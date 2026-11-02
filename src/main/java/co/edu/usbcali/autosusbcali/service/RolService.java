@@ -79,6 +79,24 @@ public class RolService implements IRolService{
         return RolMapper.rolAObtenerRolResponse(rol);
     }
 
+    @Override
+    public void eliminarRol(Long id) throws Exception {
+        if (id == null) {
+            throw new Exception("El id no puede ser nulo");
+        }
+
+        Rol rol = rolRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Rol no encontrado"));
+
+        if (!rol.getActivo()) {
+            throw new Exception("El rol ya se encuentra inactivo");
+        }
+
+        // Borrado lógico: no se elimina el registro, solo se desactiva
+        rol.setActivo(false);
+        rolRepository.save(rol);
+    }
+
     private void validarRolRequest(CrearModificarRolRequest crearModificarRolRequest) throws Exception {
         if (crearModificarRolRequest == null ) {
             throw new Exception("El objeto CrearModificarRolRequest no puede ser nulo");

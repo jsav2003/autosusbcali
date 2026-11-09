@@ -60,4 +60,10 @@ public class RolController {
         rolService.eliminarRol(id);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
+
+    @DeleteMapping("/eliminar-fisico/{id}")
+    public ResponseEntity<Void> eliminarRolFisico(@PathVariable Long id) throws Exception {
+        rolService.eliminarRolFisico(id);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
 }

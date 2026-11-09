@@ -54,6 +54,29 @@ curl -X DELETE http://localhost:8080/api/roles/eliminar/5
 
 Probado el 02/11 con la app corriendo (ver las tres respuestas de la tabla).
 
+#### Eliminar un rol de verdad — `DELETE /api/roles/eliminar-fisico/{id}`
+
+**Borrado físico:** la fila desaparece de la tabla `roles` y no se puede recuperar.
+Hibernate borra también sus filas en `roles_permisos`. Usarlo solo para roles que nadie
+usa (por ejemplo, uno creado por error); para el día a día, el borrado lógico.
+
+Antes de borrar, el servicio revisa con `UsuarioRepository.existsByRoles_Id` que ningún
+usuario tenga el rol. Si alguno lo tiene, la llave foránea de `usuarios_roles` haría
+fallar el `DELETE` en la BD, así que se responde 409 antes de intentarlo.
+
+| Situación | Respuesta |
+|---|---|
+| el rol existe y ningún usuario lo tiene | **204** No Content; la fila ya no está |
+| el id no existe | **404** "Rol no encontrado" |
+| algún usuario tiene el rol | **409** "El rol tiene usuarios asignados; use la eliminación lógica" |
+
+```
+curl -X DELETE http://localhost:8080/api/roles/eliminar-fisico/5
+```
+
+El método del servicio lleva `@Transactional`: si algo falla a mitad, no queda nada
+borrado a medias.
+
 Datos que hay en `servicios_db` para probar:
 
 | id | nombre |
@@ -89,6 +112,7 @@ en una URL.
 | **200** OK | se encontró | `/por-id/1` |
 | **204** No Content | se hizo la acción y no hay nada que devolver | `DELETE /eliminar/5` |
 | **404** Not Found | la búsqueda no encontró nada | `/por-id/99`, `/por-nombre/admin` |
+| **409** Conflict | la acción choca con otros datos | `DELETE /eliminar-fisico/1` sobre un rol con usuarios |
 | **500** Internal Server Error | una validación del servicio lanzó `Exception` | `DELETE /eliminar/5` sobre un rol ya inactivo |
 | **400** Bad Request | la URL no se puede convertir al tipo del parámetro | `/por-id/abc` (no es número), `/por-nombre/{{nombre}}` |
 

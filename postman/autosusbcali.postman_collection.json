@@ -1,0 +1,198 @@
+{
+  "info": {
+    "name": "autosusbcali",
+    "description": "Endpoints de Marca y Rol. Cambia la variable baseUrl si tu app no corre en el 8080.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:8080" },
+    { "key": "marcaId", "value": "1" },
+    { "key": "rolId", "value": "1" },
+    { "key": "modeloId", "value": "1" }
+  ],
+  "item": [
+    {
+      "name": "Marcas",
+      "item": [
+        {
+          "name": "Crear marca",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('201 Created', () => pm.response.to.have.status(201));",
+            "const b = pm.response.json();",
+            "if (b.id) pm.collectionVariables.set('marcaId', b.id);"
+          ] } }],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"nombre\": \"Toyota\"\n}" },
+            "url": { "raw": "{{baseUrl}}/api/marcas/guardar", "host": ["{{baseUrl}}"], "path": ["api", "marcas", "guardar"] }
+          }
+        },
+        {
+          "name": "Listar todas",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('200 OK', () => pm.response.to.have.status(200));"] } }],
+          "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/api/marcas", "host": ["{{baseUrl}}"], "path": ["api", "marcas"] } }
+        },
+        {
+          "name": "Listar activas",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('200 OK', () => pm.response.to.have.status(200));"] } }],
+          "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/api/marcas/activos", "host": ["{{baseUrl}}"], "path": ["api", "marcas", "activos"] } }
+        },
+        {
+          "name": "Listar inactivas",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('200 OK', () => pm.response.to.have.status(200));"] } }],
+          "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/api/marcas/inactivos", "host": ["{{baseUrl}}"], "path": ["api", "marcas", "inactivos"] } }
+        },
+        {
+          "name": "Obtener por id",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('200 OK', () => pm.response.to.have.status(200));"] } }],
+          "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/api/marcas/por-id/{{marcaId}}", "host": ["{{baseUrl}}"], "path": ["api", "marcas", "por-id", "{{marcaId}}"] } }
+        },
+        {
+          "name": "Obtener por nombre",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('200 OK', () => pm.response.to.have.status(200));"] } }],
+          "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/api/marcas/por-nombre/Toyota", "host": ["{{baseUrl}}"], "path": ["api", "marcas", "por-nombre", "Toyota"] } }
+        },
+        {
+          "name": "Modificar marca",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('200 OK', () => pm.response.to.have.status(200));"] } }],
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"nombre\": \"Toyota Colombia\"\n}" },
+            "url": { "raw": "{{baseUrl}}/api/marcas/modificar/{{marcaId}}", "host": ["{{baseUrl}}"], "path": ["api", "marcas", "modificar", "{{marcaId}}"] }
+          }
+        },
+        {
+          "name": "Eliminar (lógico)",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('204 No Content', () => pm.response.to.have.status(204));"] } }],
+          "request": { "method": "DELETE", "url": { "raw": "{{baseUrl}}/api/marcas/eliminar/{{marcaId}}", "host": ["{{baseUrl}}"], "path": ["api", "marcas", "eliminar", "{{marcaId}}"] } }
+        },
+        {
+          "name": "Eliminar (físico)",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('204 No Content', () => pm.response.to.have.status(204));"] } }],
+          "request": { "method": "DELETE", "url": { "raw": "{{baseUrl}}/api/marcas/eliminar-fisico/{{marcaId}}", "host": ["{{baseUrl}}"], "path": ["api", "marcas", "eliminar-fisico", "{{marcaId}}"] } }
+        }
+      ]
+    },
+    {
+      "name": "Roles",
+      "item": [
+        {
+          "name": "Crear rol",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('201 Created', () => pm.response.to.have.status(201));",
+            "const b = pm.response.json();",
+            "if (b.id) pm.collectionVariables.set('rolId', b.id);"
+          ] } }],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"nombre\": \"ADMIN\",\n  \"descripcion\": \"Administrador del sistema\"\n}" },
+            "url": { "raw": "{{baseUrl}}/api/roles/guardar", "host": ["{{baseUrl}}"], "path": ["api", "roles", "guardar"] }
+          }
+        },
+        {
+          "name": "Listar todos",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('200 OK', () => pm.response.to.have.status(200));"] } }],
+          "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/api/roles", "host": ["{{baseUrl}}"], "path": ["api", "roles"] } }
+        },
+        {
+          "name": "Listar activos",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('200 OK', () => pm.response.to.have.status(200));"] } }],
+          "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/api/roles/activos", "host": ["{{baseUrl}}"], "path": ["api", "roles", "activos"] } }
+        },
+        {
+          "name": "Listar inactivos",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('200 OK', () => pm.response.to.have.status(200));"] } }],
+          "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/api/roles/inactivos", "host": ["{{baseUrl}}"], "path": ["api", "roles", "inactivos"] } }
+        },
+        {
+          "name": "Obtener por id",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('200 OK', () => pm.response.to.have.status(200));"] } }],
+          "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/api/roles/por-id/{{rolId}}", "host": ["{{baseUrl}}"], "path": ["api", "roles", "por-id", "{{rolId}}"] } }
+        },
+        {
+          "name": "Obtener por nombre",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('200 OK', () => pm.response.to.have.status(200));"] } }],
+          "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/api/roles/por-nombre/ADMIN", "host": ["{{baseUrl}}"], "path": ["api", "roles", "por-nombre", "ADMIN"] } }
+        },
+        {
+          "name": "Modificar rol",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('200 OK', () => pm.response.to.have.status(200));"] } }],
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"nombre\": \"ADMIN\",\n  \"descripcion\": \"Descripción actualizada\"\n}" },
+            "url": { "raw": "{{baseUrl}}/api/roles/modificar/{{rolId}}", "host": ["{{baseUrl}}"], "path": ["api", "roles", "modificar", "{{rolId}}"] }
+          }
+        },
+        {
+          "name": "Eliminar (lógico)",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('204 No Content', () => pm.response.to.have.status(204));"] } }],
+          "request": { "method": "DELETE", "url": { "raw": "{{baseUrl}}/api/roles/eliminar/{{rolId}}", "host": ["{{baseUrl}}"], "path": ["api", "roles", "eliminar", "{{rolId}}"] } }
+        },
+        {
+          "name": "Eliminar (físico)",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('204 No Content', () => pm.response.to.have.status(204));"] } }],
+          "request": { "method": "DELETE", "url": { "raw": "{{baseUrl}}/api/roles/eliminar-fisico/{{rolId}}", "host": ["{{baseUrl}}"], "path": ["api", "roles", "eliminar-fisico", "{{rolId}}"] } }
+        }
+      ]
+    },
+    {
+      "name": "Modelos",
+      "description": "Requiere una marca activa existente: usa marcaId (se llena al crear una marca).",
+      "item": [
+        {
+          "name": "Crear modelo",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('201 Created', () => pm.response.to.have.status(201));",
+            "const b = pm.response.json();",
+            "if (b.id) pm.collectionVariables.set('modeloId', b.id);"
+          ] } }],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"nombre\": \"Corolla\",\n  \"marcaId\": {{marcaId}}\n}" },
+            "url": { "raw": "{{baseUrl}}/api/modelos/guardar", "host": ["{{baseUrl}}"], "path": ["api", "modelos", "guardar"] }
+          }
+        },
+        {
+          "name": "Listar todos",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('200 OK', () => pm.response.to.have.status(200));"] } }],
+          "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/api/modelos", "host": ["{{baseUrl}}"], "path": ["api", "modelos"] } }
+        },
+        {
+          "name": "Obtener por id",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('200 OK', () => pm.response.to.have.status(200));"] } }],
+          "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/api/modelos/por-id/{{modeloId}}", "host": ["{{baseUrl}}"], "path": ["api", "modelos", "por-id", "{{modeloId}}"] } }
+        },
+        {
+          "name": "Obtener por nombre",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('200 OK', () => pm.response.to.have.status(200));"] } }],
+          "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/api/modelos/por-nombre/Corolla", "host": ["{{baseUrl}}"], "path": ["api", "modelos", "por-nombre", "Corolla"] } }
+        },
+        {
+          "name": "Obtener por marca",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('200 OK', () => pm.response.to.have.status(200));"] } }],
+          "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/api/modelos/por-marca/{{marcaId}}", "host": ["{{baseUrl}}"], "path": ["api", "modelos", "por-marca", "{{marcaId}}"] } }
+        },
+        {
+          "name": "Modificar modelo",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('200 OK', () => pm.response.to.have.status(200));"] } }],
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"nombre\": \"Corolla Cross\",\n  \"marcaId\": {{marcaId}}\n}" },
+            "url": { "raw": "{{baseUrl}}/api/modelos/modificar/{{modeloId}}", "host": ["{{baseUrl}}"], "path": ["api", "modelos", "modificar", "{{modeloId}}"] }
+          }
+        },
+        {
+          "name": "Eliminar (físico)",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('204 No Content', () => pm.response.to.have.status(204));"] } }],
+          "request": { "method": "DELETE", "url": { "raw": "{{baseUrl}}/api/modelos/eliminar-fisico/{{modeloId}}", "host": ["{{baseUrl}}"], "path": ["api", "modelos", "eliminar-fisico", "{{modeloId}}"] } }
+        }
+      ]
+    }
+  ]
+}

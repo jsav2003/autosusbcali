@@ -86,6 +86,70 @@ Datos que hay en `servicios_db` para probar:
 | 3 | `GERENTE_VENTAS` |
 | 4 | `COMPRADOR` |
 
+### Marcas — `MarcaController` (`/api/marcas`)
+
+Mismo patrón que Roles: interfaz `IMarcaService`, `MarcaService`, DTO y `MarcaMapper`.
+
+| Método | URL | Qué hace | Respuesta |
+|---|---|---|---|
+| GET | `/api/marcas` | todas las marcas | 200 (lista vacía si no hay) |
+| GET | `/api/marcas/activos` | las que tienen `activo = true` | 200 |
+| GET | `/api/marcas/inactivos` | las que tienen `activo = false` | 200 |
+| GET | `/api/marcas/por-id/{id}` | una marca, por id | 200 / 404 |
+| GET | `/api/marcas/por-nombre/{nombre}` | una marca, por nombre | 200 / 404 |
+| POST | `/api/marcas/guardar` | crea una marca | 201 / 500 |
+| PUT | `/api/marcas/modificar/{id}` | cambia el nombre | 200 / 404 / 500 |
+| DELETE | `/api/marcas/eliminar/{id}` | borrado lógico (`activo = false`) | 204 / 404 / 500 |
+| DELETE | `/api/marcas/eliminar-fisico/{id}` | borra la fila de `marcas` | 204 / 404 / 409 |
+
+Las respuestas de consulta, de creación y de modificación son `ObtenerMarcaResponse` (`id` y `nombre`).
+La entidad `Marca` también tiene `activo`, pero no se devuelve: ver §5.
+
+**Crear y modificar** reciben `CrearModificarMarcaRequest`, que solo lleva `nombre` (a diferencia de
+Roles, no hay `descripcion`). `activo` no se manda: al crear queda en `true` y al modificar no se toca.
+
+```
+curl -X POST http://localhost:8080/api/marcas/guardar -H "Content-Type: application/json" -d "{\"nombre\":\"Suzuki\"}"
+curl -X PUT http://localhost:8080/api/marcas/modificar/9 -H "Content-Type: application/json" -d "{\"nombre\":\"Suzuki Motor\"}"
+```
+
+| Situación | Respuesta |
+|---|---|
+| `nombre` nulo o vacío | **500** "El nombre no puede ser nulo ni estar vacio" |
+| ya existe una marca con ese nombre (al crear, o al modificar a un nombre que usa otra) | **500** "Ya existe una marca con el nombre …" |
+| modificar un id que no existe | **404** "Marca no encontrada" |
+
+**Eliminación lógica** (`DELETE /api/marcas/eliminar/{id}`): pone `activo = false`; la marca pasa a
+`/inactivos`. 404 si no existe y **500** "La marca ya se encuentra inactiva" si ya lo estaba.
+
+**Eliminación física** (`DELETE /api/marcas/eliminar-fisico/{id}`): la fila desaparece y no se recupera.
+Antes de borrar, el servicio revisa con `ModeloRepository.existsByMarca_Id` que ningún modelo pertenezca a
+la marca; si alguno la usa, la llave foránea de `modelos` haría fallar el `DELETE`, así que responde
+**409** "La marca tiene modelos asociados; use la eliminación lógica". El método lleva `@Transactional`.
+
+```
+curl -X DELETE http://localhost:8080/api/marcas/eliminar/9
+curl -X DELETE http://localhost:8080/api/marcas/eliminar-fisico/9
+```
+
+Probado el 17/11 con la app corriendo y una marca de prueba que se borró al terminar.
+
+Datos que hay en `servicios_db` para probar:
+
+| id | nombre |
+|---|---|
+| 1 | `Chevrolet` |
+| 2 | `Renault` |
+| 3 | `Toyota` |
+| 4 | `Mazda` |
+| 5 | `Kia` |
+| 6 | `Nissan` |
+| 7 | `Ford` |
+| 8 | `Hyundai` |
+
+Ojo: las marcas con modelos (por ejemplo la 1) dan 409 en `eliminar-fisico`; para probar el 204
+hay que crear una marca nueva.
+
 ---
 
 ## 2. Cómo leer una URL con `{llaves}`

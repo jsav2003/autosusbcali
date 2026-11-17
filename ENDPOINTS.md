@@ -150,6 +150,54 @@ Datos que hay en `servicios_db` para probar:
 Ojo: las marcas con modelos (por ejemplo la 1) dan 409 en `eliminar-fisico`; para probar el 204
 hay que crear una marca nueva.
 
+### Modelos — `ModeloController` (`/api/modelos`)
+
+Mismo patrón que Marcas (interfaz `IModeloService`, `ModeloService`, DTOs y `ModeloMapper`), con tres
+diferencias: un modelo **pertenece a una marca**, **no tiene `activo`** y por eso **no hay borrado lógico**
+(la tabla `modelos` no tiene esa columna; agregarla exigiría un `ALTER TABLE` a mano).
+
+| Método | URL | Qué hace | Respuesta |
+|---|---|---|---|
+| GET | `/api/modelos` | todos los modelos | 200 (lista vacía si no hay) |
+| GET | `/api/modelos/por-id/{id}` | un modelo, por id | 200 / 404 |
+| GET | `/api/modelos/por-nombre/{nombre}` | los modelos con ese nombre (**lista**) | 200 (lista vacía si no hay) |
+| GET | `/api/modelos/por-marca/{marcaId}` | los modelos de una marca | 200 / 404 (marca no existe) |
+| POST | `/api/modelos/guardar` | crea un modelo | 201 / 404 / 500 |
+| PUT | `/api/modelos/modificar/{id}` | cambia nombre y marca | 200 / 404 / 500 |
+| DELETE | `/api/modelos/eliminar-fisico/{id}` | borra la fila de `modelos` | 204 / 404 / 409 |
+
+`por-nombre` devuelve una lista porque el nombre solo es único **dentro de una marca**: dos marcas pueden
+tener un modelo con el mismo nombre.
+
+**Crear y modificar** reciben `CrearModificarModeloRequest` con `nombre` y `marcaId` (el id de una marca que
+ya exista). La respuesta es `ObtenerModeloResponse`: `id`, `nombre`, `marcaId` y `marcaNombre`. Se devuelven
+los datos planos de la marca y no la entidad `Marca`, por lo mismo que en §5.
+
+```
+curl -X POST http://localhost:8080/api/modelos/guardar -H "Content-Type: application/json" -d "{\"nombre\":\"Corolla\",\"marcaId\":3}"
+curl -X PUT http://localhost:8080/api/modelos/modificar/1 -H "Content-Type: application/json" -d "{\"nombre\":\"Corolla Cross\",\"marcaId\":3}"
+```
+
+| Situación | Respuesta |
+|---|---|
+| `nombre` nulo o vacío, o `marcaId` nulo | **500** "El nombre no puede ser nulo ni estar vacio" / "El marcaId no puede ser nulo" |
+| la marca (`marcaId`) no existe | **404** "Marca no encontrada" |
+| la marca existe pero está inactiva | **500** "La marca … está inactiva" |
+| esa marca ya tiene un modelo con ese nombre (al crear, o al modificar a uno que ya existe en la marca) | **500** "Ya existe el modelo … para la marca …" |
+| modificar o consultar un id de modelo que no existe | **404** "Modelo no encontrado" |
+
+**Eliminación física** (`DELETE /api/modelos/eliminar-fisico/{id}`): la fila desaparece y no se recupera.
+Antes de borrar, el servicio revisa con `VehiculoRepository.existsByModelo_Id` que ningún vehículo use el
+modelo; si alguno lo usa, la llave foránea de `vehiculos` haría fallar el `DELETE`, así que responde **409**
+"El modelo tiene vehículos asociados y no se puede eliminar". El método lleva `@Transactional`.
+
+```
+curl -X DELETE http://localhost:8080/api/modelos/eliminar-fisico/1
+```
+
+Las pruebas de Postman están en `postman/autosusbcali.postman_collection.json` (carpeta **Modelos**). Crea
+primero una marca activa para que se llene `marcaId`. **Todavía no se ha probado contra la base.**
+
 ---
 
 ## 2. Cómo leer una URL con `{llaves}`
